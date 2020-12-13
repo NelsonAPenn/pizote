@@ -26,7 +26,7 @@ The Rusty, code-first, cross-platform application/document framework.
 
 ## Information and actions performed through message passing.
 
-Actions and information (described below) are passed between components with a root or destination at one of the backend implementations of the APIs shown below. This helps control flow of information, and prevent over-inheritance or unwanted interactions between components as present in HTML/CSS/Javascript
+Actions and information (described below) are passed between components with a root or destination at one of the backend implementations of the APIs shown below. This helps control flow of information, and prevent over-inheritance or unwanted interactions between components as present in HTML/CSS/Javascript.
 
 ## `pizote` dynamic APIs
 

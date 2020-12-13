@@ -4,12 +4,22 @@ use std::sync::mpsc::{Sender, Receiver};
 pub enum DrawAction
 {
     Noop,
+
     Clear,
+
     // (x_0, y_0), (x_1, y_1)
     Line((f64, f64), (f64, f64)),
-    // (x_0, y_0), w, h
+
+    // center, w, h
     Ellipse((f64, f64), f64, f64),
-    Image()
+    Image(),
+
+    // uuid, origin, w, h
+    NewComponent(String, (f64, f64), f64, f64),
+
+    // uuid, action
+    NestedAction(String, Box<DrawAction>)
+    
 
 }
 

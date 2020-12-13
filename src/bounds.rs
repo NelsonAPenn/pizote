@@ -95,6 +95,9 @@ impl Bounds
 
         self.arbitrated_bounds.push(portion.clone());
 
+        let uuid = String::from("thing");
+        sender.send(DrawAction::NewComponent(uuid.clone(), portion.offset, w, h)).unwrap();
+
         let (tx, rx) = channel::<DrawAction>();
 
         let bounds_copy = portion.bounds.clone();
@@ -104,13 +107,9 @@ impl Bounds
             {
                 match rx.try_recv()
                 {
-                    Ok(mut action) =>
+                    Ok(action) =>
                     {
-                        // clip
-                        action = bounds_copy.clip(action);
-                        // transform
-                        action = DrawAction::transform(action, (x, y) );
-                        sender.send(action).unwrap();
+                        sender.send(DrawAction::NestedAction(uuid.clone(), Box::new(action))).unwrap();
                     },
                     Err(TryRecvError::Disconnected) => {
                         break 'recv;

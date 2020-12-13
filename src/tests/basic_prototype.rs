@@ -58,7 +58,7 @@ impl DynamicDrawableComponent for DragonFractalComponent
 
             location = next_location;
             n += 1;
-            std::thread::sleep(std::time::Duration::from_millis(80));
+            // std::thread::sleep(std::time::Duration::from_millis(0));
         }
 
     }

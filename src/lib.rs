@@ -1,4 +1,3 @@
-pub mod component;
 pub mod bounds;
 pub mod std;
 pub mod action;

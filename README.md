@@ -19,11 +19,14 @@ The Rusty, code-first, cross-platform application/document framework.
 - Flexible and fully hackable
   - No restrictions on what can be built.
 - Message based dynamic operation
+- Prevents over-inheritance
+  - A big issue with CSS - everything tends to inherit styles and properties you don't want them to.
+  - Rust is a great choise for this, because of its unique approach on inheritance in the form of traits.
 - Super fast
 
-## Bounds + Information --> Component
+## Information and actions performed through message passing.
 
-A component receives bounds and information. Then it uses the bounds and information, allocating some to subcomponents. It can optionally give back bounds and information to the parent.
+Actions and information (described below) are passed between components with a root or destination at one of the backend implementations of the APIs shown below. This helps control flow of information, and prevent over-inheritance or unwanted interactions between components as present in HTML/CSS/Javascript
 
 ## `pizote` dynamic APIs
 

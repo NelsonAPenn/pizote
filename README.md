@@ -2,6 +2,8 @@
 
 The Rusty, code-first, cross-platform application/document framework.
 
+Work in progress, recently started.
+
 ## Design goals
 
 - Code-first
@@ -60,8 +62,6 @@ If the application is dynamic, these would be some appropriate backends:
   - A simple multimedia library perfect for a `pizote` desktop application.
 - Android
 - IOS
-
-For the purposes of this hackathon, I only worked with the `draw` interface and the `SFML` backend.
 
 ## Pizote Drawing APIs
 

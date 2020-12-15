@@ -8,6 +8,8 @@ Work in progress, recently started.
 
 - Code-first
   - LaTeX works great until you try do do something complicated. Third party packages for graphs, trees, etc. often don't work very well.
+- Cross-platform
+  - Applications using the `pizote` APIs should be able to run on a different platform simply by compiling it with a different backend.
 - Integration with a great package manager: promotes third-party integrations
   - Best not to reinvent the wheel. `cargo` is perfectly suited for the job.
 - Sidestep HTML/CSS/Javascript
@@ -19,15 +21,21 @@ Work in progress, recently started.
 - Control of flow of information
   - With message passing as a basis for actions performed or information accessed, the component you build has fine control over what its children can see/do.
 - Flexible and fully hackable
-  - No restrictions on what can be built.
+  - No restrictions on what can be built. Right now, I have no traits restricting built components in any fashion, but I may provide some traits for suggested design patterns.
 - Message-based dynamic operation
 - Prevents over-inheritance
   - A big issue with CSS - everything tends to inherit styles and properties you don't want them to.
   - Rust is a great choice for this, because of its unique approach on inheritance in the form of traits.
 - Super fast
+  - In Rust!
+  - Asynchronous operation
 - Easily swap themes
   - `pizote::theme::Theme` trait will provide applications with a usage-defined color palette
   - Several default themes will be included in the `pizote` standard library.
+
+## Bounds + Information = Component
+
+This is the primary, suggested design pattern for `pizote` applications. If you publish a component, it should accept initial bounds and configuration information, which should include a `dyn pizote::theme::Theme` as part of it if it uses the `Draw` API.
 
 ## Information and actions performed through message passing.
 

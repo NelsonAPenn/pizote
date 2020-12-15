@@ -74,7 +74,8 @@ If the application is dynamic, these would be some appropriate backends:
 
 ## Example components (most likely will be added to the `pizote` standard library)
 
-- Components for graphing
+- Components for graphing (perhaps a component that integrates `matplotlib`)
+- Vertex-edge graphs and trees, with labelable nodes
 - LaTeX math component
 - Text-focused components:
  - Paragraphs, columns, etc.

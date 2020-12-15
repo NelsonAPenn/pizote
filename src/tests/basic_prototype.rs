@@ -2,6 +2,7 @@ use crate::std::backends::sfml::Sfml;
 use std::sync::mpsc::Sender;
 use crate::bounds::{Bounds, OffsetBounds};
 use crate::action::draw::{Draw, DrawAction, DynamicDrawableComponent};
+use crate::backend::Backend;
 
 fn rotate( point: (f64, f64), angle: f64) -> (f64, f64)
 {
@@ -58,7 +59,7 @@ impl DynamicDrawableComponent for DragonFractalComponent
 
             location = next_location;
             n += 1;
-            // std::thread::sleep(std::time::Duration::from_millis(0));
+            std::thread::sleep(std::time::Duration::from_millis(16));
         }
 
     }
@@ -67,7 +68,7 @@ impl DynamicDrawableComponent for DragonFractalComponent
 #[test]
 fn basic_prototype()
 {
-    let mut backend = Box::new(Sfml{}) as Box<dyn Draw>;
+    let mut backend = Box::new(Sfml{}) as Box<dyn Backend>;
 
     let mut initial_bounds = Bounds::new(1000., 1000.);
     

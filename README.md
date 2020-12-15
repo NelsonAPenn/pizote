@@ -1,6 +1,6 @@
 # `pizote`
 
-The Rusty, code-first, cross-platform application/document framework.
+The (not quite yet usable) rusty, code-first, cross-platform application/document framework.
 
 Work in progress, recently started.
 

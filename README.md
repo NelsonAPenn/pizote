@@ -62,15 +62,24 @@ If the application is dynamic, these would be some appropriate backends:
 - Web
   - The plan would be to take a canvas-webassembly approach to compile and integrate the code.
 - SFML
-  - A simple multimedia library perfect for a `pizote` desktop application.
+  - A simple multimedia library perfect for a desktop application.
 - Android
 - IOS
 
 ## Pizote Draw API
 
 - Cannot draw outside the component's bounds
-- SVG-level commands
+- SVG-level-ish commands
 - Coordinates and units are in terms of the component's bounds (start at 0,0 in the upper left corner)
+
+## Roadmap
+
+- Flesh out `draw` API. Test using SFML backend.
+- Integrate `pizote` theme closely with the `draw` API.
+- Flesh out the other APIs. Test using SFML backend.
+- Write other backends incrementally, while revising interfaces. Priority: SFML, web, mobile
+- Maintain and improve!
+
 
 ## Example components (most likely will be added to the `pizote` standard library)
 

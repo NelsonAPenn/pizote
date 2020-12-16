@@ -4,7 +4,7 @@ use std::collections::HashMap;
 use std::thread;
 use std::sync::mpsc::{channel, Sender, TryRecvError};
 use crate::action::draw::{Draw, DrawAction};
-use crate::bounds::Bounds;
+use crate::bounds::{Bounds, ArbitratedBounds};
 use std::time::Duration;
 
 use sfml::{
@@ -17,36 +17,46 @@ use sfml::{
 
 struct RenderNode
 {
+    pub z_index: i8,
+    pub offset: (f64, f64),
     pub texture: RenderTexture,
-    pub children: HashMap<String, ( (f64, f64), RenderNode)>
+    pub children: HashMap<String, RenderNode>
 }
 
 impl RenderNode
 {
-    pub fn new(w: f64, h: f64) -> RenderNode
+    pub fn new(arbitrated_bounds: ArbitratedBounds) -> RenderNode
     {
-        let texture = RenderTexture::new(w as u32, h as u32, false).unwrap();
+        let texture = RenderTexture::new(arbitrated_bounds.bounds.width as u32, arbitrated_bounds.bounds.height as u32, false).unwrap();
 
+        let z_index = arbitrated_bounds.z_index;
+        let offset = arbitrated_bounds.offset;
         RenderNode
         {
+            z_index,
+            offset,
             texture,
-            children: HashMap::<String, ((f64, f64), RenderNode)>::new()
+            children: HashMap::<String, RenderNode>::new()
         }
     }
 
-    pub fn add_child(&mut self, uuid: String, z: i8, offset: (f64, f64), w: f64, h: f64)
+    pub fn add_child(&mut self, uuid: String, arbitrated_bounds: ArbitratedBounds)
     {
-        let new_node = RenderNode::new(w, h);
-        self.children.insert(uuid, (offset, new_node));
+        let new_node = RenderNode::new(arbitrated_bounds);
+        self.children.insert(uuid, new_node);
     }
 
     pub fn draw_children(&mut self)
     {
-        for (_uuid, (_offset, child)) in self.children.iter_mut()
+        let mut children = self.children.iter_mut().map( | (_uuid, child) | child ).collect::<Vec<&mut RenderNode>>();
+        children.sort_by(|a, b| a.z_index.cmp( &b.z_index ) );
+
+        for child in children
         {
             child.draw_children();
             let mut sprite = Sprite::new();
             sprite.set_texture(child.texture.texture(), true);
+            sprite.set_position(Vector2f::new(child.offset.0 as f32, child.offset.1 as f32));
             self.texture.draw(&sprite);
         }
     }
@@ -76,7 +86,7 @@ impl Draw for Sfml
                 Style::CLOSE,
                 &context_settings,
             );
-            let mut root = RenderNode::new(initial_bounds.width, initial_bounds.height);
+            let mut root = RenderNode::new(ArbitratedBounds::new(0, (0., 0.), initial_bounds.width, initial_bounds.height));
             {
                 let mut sprite = Sprite::new();
                 sprite.set_texture(root.texture.texture(), true);
@@ -110,27 +120,45 @@ impl Draw for Sfml
                         'unpack_action: loop{
                             match action
                             {
-                                DrawAction::Noop => {
-                                    // do nothing!
-                                    break 'unpack_action;
-                                },
-                                DrawAction::Line( (x_0, y_0), (x_1, y_1) ) => {
+                                DrawAction::Line( color, point_0, point_1 ) => {
                                     let mut line = VertexArray::new(PrimitiveType::Lines, 2);
-                                    line[0].position = Vector2f::new(x_0 as f32, y_0 as f32);
-                                    line[1].position = Vector2f::new(x_1 as f32, y_1 as f32);
+                                    line[0].position = Vector2f::new(point_0.0 as f32, point_0.1 as f32);
+                                    line[1].position = Vector2f::new(point_1.0 as f32, point_1.1 as f32);
+                                    line[0].color = sfml::graphics::Color
+                                    {
+                                        r: color.0,
+                                        g: color.1,
+                                        b: color.2,
+                                        a: color.3
+                                    };
+                                    line[1].color = sfml::graphics::Color
+                                    {
+                                        r: color.0,
+                                        g: color.1,
+                                        b: color.2,
+                                        a: color.3
+                                    };
                                     working_node.texture.draw(&line);
                                     break 'unpack_action;
                                 },
-                                DrawAction::Clear => {
-                                    working_node.texture.clear(Color::rgb(0, 0, 0));
+                                DrawAction::Clear(color) => {
+                                    let sf_color = sfml::graphics::Color
+                                    {
+                                        r: color.0,
+                                        g: color.1,
+                                        b: color.1,
+                                        a: color.3
+                                    };
+
+                                    working_node.texture.clear(sf_color);
                                     break 'unpack_action;
                                 },
-                                DrawAction::NewComponent(uuid, z, offset, w, h) => {
-                                    working_node.add_child(uuid, z, offset, w, h);
+                                DrawAction::AddArbitratedBounds(uuid, arbitrated_bounds) => {
+                                    working_node.add_child(uuid, arbitrated_bounds);
                                     break 'unpack_action;
                                 },
                                 DrawAction::NestedAction(uuid, next_action) => {
-                                    working_node = &mut working_node.children.get_mut(&uuid).unwrap().1;
+                                    working_node = working_node.children.get_mut(&uuid).unwrap();
                                     action = *next_action;
                                 },
                                 _ => {

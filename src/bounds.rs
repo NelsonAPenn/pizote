@@ -19,24 +19,26 @@ use std::time::Duration;
 #[derive(Clone)]
 pub struct Bounds // treat as two triangular bounds... eventually
 {
-    arbitrated_bounds: Vec<OffsetBounds>,
+    arbitrated_bounds: Vec<ArbitratedBounds>,
     pub width: f64,
     pub height: f64
 }
 
 #[derive(Clone)]
-pub struct OffsetBounds
+pub struct ArbitratedBounds
 {
-    offset: (f64, f64),
-    bounds: Bounds
+    pub z_index: i8,
+    pub offset: (f64, f64),
+    pub bounds: Bounds
 }
 
-impl OffsetBounds
+impl ArbitratedBounds
 {
-    pub fn new( offset: (f64, f64), width: f64, height: f64) -> OffsetBounds
+    pub fn new( z_index: i8, offset: (f64, f64), width: f64, height: f64) -> ArbitratedBounds
     {
-        OffsetBounds
+        ArbitratedBounds
         {
+            z_index,
             offset,
             bounds: Bounds::new(width, height)
         }
@@ -51,7 +53,7 @@ impl Bounds
         {
             width,
             height,
-            arbitrated_bounds: Vec::<OffsetBounds>::new()
+            arbitrated_bounds: Vec::<ArbitratedBounds>::new()
         }
     }
 
@@ -62,27 +64,7 @@ impl Bounds
     }
 
 
-    pub fn clip(&self, action: DrawAction) -> DrawAction
-    {
-        let new_action = match action
-        {
-            DrawAction::Line( (x_0, y_0), (x_1, y_1) ) => {
-                // TODO: fix this
-                if !self.contains_point( &(x_0, y_0) ) || !self.contains_point( &(x_1, y_1) ){
-                    DrawAction::Noop
-                }
-                else{
-                    action
-                }
-            },
-            _ => {
-                action
-            }
-        };
-        return new_action
-    }
-
-    pub fn arbitrate(&mut self, portion: OffsetBounds, sender: Sender<DrawAction>) -> Result<(Bounds, Sender<DrawAction>), String>
+    pub fn arbitrate(&mut self, portion: ArbitratedBounds, sender: Sender<DrawAction>) -> Result<(Bounds, Sender<DrawAction>), String>
     {
         let (x, y) = portion.offset;
         let (w, h) = (portion.bounds.width, portion.bounds.height);
@@ -96,11 +78,10 @@ impl Bounds
         self.arbitrated_bounds.push(portion.clone());
 
         let uuid = String::from("thing");
-        sender.send(DrawAction::NewComponent(uuid.clone(), 0, portion.offset, w, h)).unwrap();
+        sender.send(DrawAction::AddArbitratedBounds(uuid.clone(), portion.clone())).unwrap();
 
         let (tx, rx) = channel::<DrawAction>();
 
-        let bounds_copy = portion.bounds.clone();
         // spawn clip middleware
         thread::spawn( move || {
             'recv: loop
@@ -131,7 +112,7 @@ impl Bounds
 //     (Dimension, Dimension)
 // );
 
-pub fn bounds_overlapping(bounds_list: Vec<OffsetBounds>) -> bool
+pub fn bounds_overlapping(bounds_list: Vec<ArbitratedBounds>) -> bool
 {
     false
 }

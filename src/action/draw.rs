@@ -1,21 +1,20 @@
-use crate::bounds::{Bounds};
+use crate::bounds::{Bounds, ArbitratedBounds};
 use std::sync::mpsc::{Sender, Receiver};
+use crate::cartesian::Cartesian;
 
 pub enum DrawAction
 {
-    Noop,
-
-    Clear,
+    Clear(Color),
 
     // (x_0, y_0), (x_1, y_1)
-    Line((f64, f64), (f64, f64)),
+    Line( Color, Cartesian, Cartesian),
 
     // center, w, h
-    Ellipse((f64, f64), f64, f64),
+    Ellipse(Style, Cartesian, f64, f64),
     Image(),
 
     // uuid, z-index, origin, w, h
-    NewComponent(String, i8, (f64, f64), f64, f64),
+    AddArbitratedBounds(String, ArbitratedBounds),
 
     // uuid, action
     NestedAction(String, Box<DrawAction>)
@@ -23,25 +22,25 @@ pub enum DrawAction
 
 }
 
-impl DrawAction
+pub struct Style
 {
-    pub fn transform(action: DrawAction, delta: (f64, f64)) -> DrawAction
-    {
-        let (dx, dy) = delta;
-        match action
-        {
-            DrawAction::Line( (x_0, y_0), (x_1, y_1) )=>
-            {
-                DrawAction::Line( (x_0 + dx, y_0 + dy), (x_1 + dx, y_1 + dy) )
-            }
-            DrawAction::Noop | DrawAction::Clear => { action },
-            _ => {
-                panic!("Not implemented.");
-            }
-
-        }
-    }
+    pub stroke_color: Color,
+    // font: Box<dyn Font>
+    pub fill_color: Color
 }
+
+
+pub struct Color(pub u8, pub u8, pub u8, pub u8);
+
+impl Color
+{
+    // pub fn from_rgba()
+    // pub fn from_hsla()
+    // ...
+}
+
+
+impl DrawAction { }
 
 pub trait StaticDrawableComponent
 {

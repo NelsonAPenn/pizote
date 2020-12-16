@@ -1,8 +1,9 @@
 use crate::std::backends::sfml::Sfml;
 use std::sync::mpsc::Sender;
-use crate::bounds::{Bounds, OffsetBounds};
-use crate::action::draw::{Draw, DrawAction, DynamicDrawableComponent};
+use crate::bounds::{Bounds, ArbitratedBounds};
+use crate::action::draw::{Draw, DrawAction, DynamicDrawableComponent, Color};
 use crate::backend::Backend;
+use crate::cartesian::Cartesian;
 
 fn rotate( point: (f64, f64), angle: f64) -> (f64, f64)
 {
@@ -34,9 +35,12 @@ impl DynamicDrawableComponent for DragonFractalComponent
 {
     fn spawn(&mut self, sender: Sender<DrawAction>)
     {
-        let mut n = 0;
+        let mut n: i32 = 0;
         let mut previous_direction = (0., -self.unit_width);
-        let mut location = (self.initial_bounds.width / 2., self.initial_bounds.height / 2.);
+        let mut location = Cartesian {
+            0: self.initial_bounds.width / 2.,
+            1: self.initial_bounds.height / 2.
+        };
 
         loop
         {
@@ -51,15 +55,25 @@ impl DynamicDrawableComponent for DragonFractalComponent
                     rotate(previous_direction, -std::f64::consts::PI / 2.)
                 };
 
-            let next_location = (location.0 + previous_direction.0, location.1 + previous_direction.1);
+            let next_location = Cartesian{
+                0: location.0 + previous_direction.0,
+                1: location.1 + previous_direction.1
+            };
+
             sender.send(DrawAction::Line(
-                location,
-                next_location
+                Color{
+                    0: n as u8,
+                    1: 255,
+                    2: 0,
+                    3: 255
+                },
+                location.clone(),
+                next_location.clone()
             )).unwrap();
 
             location = next_location;
             n += 1;
-            std::thread::sleep(std::time::Duration::from_millis(16));
+            std::thread::sleep(std::time::Duration::from_millis(8));
         }
 
     }
@@ -75,7 +89,114 @@ fn basic_prototype()
 
     let sender = backend.spawn(initial_bounds.clone());
 
-    let (bounds, sender) = initial_bounds.arbitrate( OffsetBounds::new( (100., 100.), 600., 600. ), sender).unwrap();
+    sender.send(DrawAction::Line{
+        0: Color
+        {
+            0: 0,
+            1: 255,
+            2: 0,
+            3: 255
+        },
+        1: Cartesian{
+            0: 0.,
+            1: 0.
+        },
+        2: Cartesian
+        {
+            0: initial_bounds.width,
+            1: initial_bounds.height
+        }
+
+    }).unwrap();
+
+    sender.send(DrawAction::Line{
+        0: Color
+        {
+            0: 0,
+            1: 0,
+            2: 255,
+            3: 255
+        },
+        1: Cartesian{
+            0: 0.,
+            1: initial_bounds.height
+        },
+        2: Cartesian
+        {
+            0: initial_bounds.width,
+            1: 0.
+        }
+
+    }).unwrap();
+
+    let bg_sender = sender.clone();
+
+    std::thread::spawn(move || {
+        let mut n: u8 = 0;
+        loop
+        {
+            bg_sender.send(DrawAction::Clear(Color{
+                0: n,
+                1: n,
+                2: n,
+                3: 255
+            })).unwrap();
+
+            if n == 255
+            {
+                n = 0
+            }
+            else
+            {
+                n = n + 1
+            }
+
+            println!("{}", n);
+            std::thread::sleep_ms(8);
+        }
+    });
+
+    let (bounds, sender) = initial_bounds.arbitrate( ArbitratedBounds::new( 0, (100., 100.), 600., 600. ), sender).unwrap();
+
+    sender.send(DrawAction::Line{
+        0: Color
+        {
+            0: 255,
+            1: 0,
+            2: 0,
+            3: 255
+        },
+        1: Cartesian{
+            0: 0.,
+            1: 0.
+        },
+        2: Cartesian
+        {
+            0: bounds.width,
+            1: bounds.height
+        }
+
+    }).unwrap();
+
+    sender.send(DrawAction::Line{
+        0: Color
+        {
+            0: 255,
+            1: 0,
+            2: 0,
+            3: 255
+        },
+        1: Cartesian{
+            0: 0.,
+            1: bounds.height
+        },
+        2: Cartesian
+        {
+            0: bounds.width,
+            1: 0.
+        }
+
+    }).unwrap();
 
     let mut dragon = DragonFractalComponent::new(bounds, 10.);
 

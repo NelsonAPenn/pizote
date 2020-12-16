@@ -96,7 +96,7 @@ impl Bounds
         self.arbitrated_bounds.push(portion.clone());
 
         let uuid = String::from("thing");
-        sender.send(DrawAction::NewComponent(uuid.clone(), portion.offset, w, h)).unwrap();
+        sender.send(DrawAction::NewComponent(uuid.clone(), 0, portion.offset, w, h)).unwrap();
 
         let (tx, rx) = channel::<DrawAction>();
 

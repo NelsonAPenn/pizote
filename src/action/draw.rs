@@ -14,8 +14,8 @@ pub enum DrawAction
     Ellipse((f64, f64), f64, f64),
     Image(),
 
-    // uuid, origin, w, h
-    NewComponent(String, (f64, f64), f64, f64),
+    // uuid, z-index, origin, w, h
+    NewComponent(String, i8, (f64, f64), f64, f64),
 
     // uuid, action
     NestedAction(String, Box<DrawAction>)

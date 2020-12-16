@@ -34,7 +34,7 @@ impl RenderNode
         }
     }
 
-    pub fn add_child(&mut self, uuid: String, offset: (f64, f64), w: f64, h: f64)
+    pub fn add_child(&mut self, uuid: String, z: i8, offset: (f64, f64), w: f64, h: f64)
     {
         let new_node = RenderNode::new(w, h);
         self.children.insert(uuid, (offset, new_node));
@@ -125,8 +125,8 @@ impl Draw for Sfml
                                     working_node.texture.clear(Color::rgb(0, 0, 0));
                                     break 'unpack_action;
                                 },
-                                DrawAction::NewComponent(uuid, offset, w, h) => {
-                                    working_node.add_child(uuid, offset, w, h);
+                                DrawAction::NewComponent(uuid, z, offset, w, h) => {
+                                    working_node.add_child(uuid, z, offset, w, h);
                                     break 'unpack_action;
                                 },
                                 DrawAction::NestedAction(uuid, next_action) => {

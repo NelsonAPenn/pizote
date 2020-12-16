@@ -88,6 +88,11 @@ If the application is dynamic, these would be some appropriate backends:
 - Write other backends incrementally, while revising interfaces. Priority: SFML, web, mobile
 - Maintain and improve!
 
+## Contributions and feedback
+
+Feel free to create issues, contribute, and/or provide feedback. See the license and contributing guidelines (the latter is quite sparse at the moment).
+
+Also, I value feedback highly! The project is in its earliest stages now; because of this, feedback is crucial! Please forward any feedback to `pizote@protonmail.com`. This could be anything regarding design, plans, or the like. Once there is enough interest, I may create weekly/biweekly meetings.
 
 ## Example components (most likely will be added to the `pizote` standard library)
 

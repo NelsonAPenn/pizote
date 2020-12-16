@@ -10,22 +10,41 @@ pub enum DrawAction
     Line( Color, Cartesian, Cartesian),
 
     // center, w, h
-    Ellipse(Style, Cartesian, f64, f64),
+    Ellipse(ShapeStyle, Cartesian, f64, f64),
+
     Image(),
+
+    Text(TextStyle, String),
 
     // uuid, z-index, origin, w, h
     AddArbitratedBounds(String, ArbitratedBounds),
 
     // uuid, action
     NestedAction(String, Box<DrawAction>)
+
     
 
 }
 
-pub struct Style
+pub struct TextStyle
+{
+    pub size: f64,
+    pub color: Color
+    // pub font:
+    // pub variant:
+}
+
+
+pub struct StrokeStyle
 {
     pub stroke_color: Color,
     // font: Box<dyn Font>
+    pub stroke_width: f64
+}
+
+pub struct ShapeStyle
+{
+    pub stroke_style: StrokeStyle,
     pub fill_color: Color
 }
 

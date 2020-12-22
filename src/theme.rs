@@ -17,5 +17,6 @@ pub trait Theme
     fn class() -> TextStyle;
     fn variable() -> TextStyle;
     fn constant() -> TextStyle;
+    fn comment() -> TextStyle;
 
 }

@@ -96,92 +96,76 @@ impl Draw for Sfml
             // window.clear(Color::rgb(255, 255, 255));
             window.display();
             
-            'render: loop
+            for mut action in rx
             {
-                while let Some(event) = window.poll_event()
+                match window.poll_event()
                 {
-                    match event
+                    Some(Event::Closed) => 
                     {
-                        Event::Closed => 
-                        {
-                            window.close();
-                            break 'render;
-                        },
-                        _ => {}
-                    }
-                }
-                match rx.try_recv()
-                {
-
-
-                    Ok(mut action) => {
-                        // draw the action
-                        let mut working_node = &mut root;
-                        'unpack_action: loop{
-                            match action
-                            {
-                                DrawAction::Line( color, point_0, point_1 ) => {
-                                    let mut line = VertexArray::new(PrimitiveType::Lines, 2);
-                                    line[0].position = Vector2f::new(point_0.0 as f32, point_0.1 as f32);
-                                    line[1].position = Vector2f::new(point_1.0 as f32, point_1.1 as f32);
-                                    line[0].color = sfml::graphics::Color
-                                    {
-                                        r: color.0,
-                                        g: color.1,
-                                        b: color.2,
-                                        a: color.3
-                                    };
-                                    line[1].color = sfml::graphics::Color
-                                    {
-                                        r: color.0,
-                                        g: color.1,
-                                        b: color.2,
-                                        a: color.3
-                                    };
-                                    working_node.texture.draw(&line);
-                                    break 'unpack_action;
-                                },
-                                DrawAction::Clear(color) => {
-                                    let sf_color = sfml::graphics::Color
-                                    {
-                                        r: color.0,
-                                        g: color.1,
-                                        b: color.1,
-                                        a: color.3
-                                    };
-
-                                    working_node.texture.clear(sf_color);
-                                    break 'unpack_action;
-                                },
-                                DrawAction::AddArbitratedBounds(uuid, arbitrated_bounds) => {
-                                    working_node.add_child(uuid, arbitrated_bounds);
-                                    break 'unpack_action;
-                                },
-                                DrawAction::NestedAction(uuid, next_action) => {
-                                    working_node = working_node.children.get_mut(&uuid).unwrap();
-                                    action = *next_action;
-                                },
-                                _ => {
-                                    panic!("Not implemented.");
-                                }
-                            }
-                        }
-                        root.draw_children();
-                        let mut sprite = Sprite::new();
-                        sprite.set_texture(root.texture.texture(), true);
-                        window.draw(&sprite);
-
-                        window.display();
-                    }
-                    Err(TryRecvError::Disconnected) => {
-                        break 'render;
-
+                        window.close();
+                        break;
                     },
-                    Err(TryRecvError::Empty) => {
-                        // do nothing
-                        thread::sleep(Duration::from_millis(crate::constants::WAIT_ON_EMPTY_MS));
+                    _ => {}
+
+                }
+
+                // draw the action
+                let mut working_node = &mut root;
+                'unpack_action: loop{
+                    match action
+                    {
+                        DrawAction::Line( color, point_0, point_1 ) => {
+                            let mut line = VertexArray::new(PrimitiveType::Lines, 2);
+                            line[0].position = Vector2f::new(point_0.0 as f32, point_0.1 as f32);
+                            line[1].position = Vector2f::new(point_1.0 as f32, point_1.1 as f32);
+                            line[0].color = sfml::graphics::Color
+                            {
+                                r: color.0,
+                                g: color.1,
+                                b: color.2,
+                                a: color.3
+                            };
+                            line[1].color = sfml::graphics::Color
+                            {
+                                r: color.0,
+                                g: color.1,
+                                b: color.2,
+                                a: color.3
+                            };
+                            working_node.texture.draw(&line);
+                            break 'unpack_action;
+                        },
+                        DrawAction::Clear(color) => {
+                            let sf_color = sfml::graphics::Color
+                            {
+                                r: color.0,
+                                g: color.1,
+                                b: color.1,
+                                a: color.3
+                            };
+
+                            working_node.texture.clear(sf_color);
+                            break 'unpack_action;
+                        },
+                        DrawAction::AddArbitratedBounds(uuid, arbitrated_bounds) => {
+                            working_node.add_child(uuid, arbitrated_bounds);
+                            break 'unpack_action;
+                        },
+                        DrawAction::NestedAction(uuid, next_action) => {
+                            working_node = working_node.children.get_mut(&uuid).unwrap();
+                            action = *next_action;
+                        },
+                        _ => {
+                            panic!("Not implemented.");
+                        }
                     }
                 }
+                root.draw_children();
+                let mut sprite = Sprite::new();
+                sprite.set_texture(root.texture.texture(), true);
+                window.draw(&sprite);
+
+                window.display();
             }
         });
 

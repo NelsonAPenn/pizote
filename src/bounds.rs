@@ -84,21 +84,9 @@ impl Bounds
 
         // spawn clip middleware
         thread::spawn( move || {
-            'recv: loop
+            for action in rx
             {
-                match rx.try_recv()
-                {
-                    Ok(action) =>
-                    {
-                        sender.send(DrawAction::NestedAction(uuid.clone(), Box::new(action))).unwrap();
-                    },
-                    Err(TryRecvError::Disconnected) => {
-                        break 'recv;
-                    },
-                    _ => {
-                        thread::sleep(Duration::from_millis(crate::constants::WAIT_ON_EMPTY_MS));
-                    }
-                }
+                sender.send(DrawAction::NestedAction(uuid.clone(), Box::new(action))).unwrap();
             }
         });
 

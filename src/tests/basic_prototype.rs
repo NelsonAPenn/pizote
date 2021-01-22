@@ -151,7 +151,7 @@ fn basic_prototype()
                 n = n + 1
             }
 
-            std::thread::sleep_ms(8);
+            std::thread::sleep(std::time::Duration::from_millis(8));
         }
     });
 
